@@ -5,9 +5,15 @@ const config: CapacitorConfig = {
   appName: 'planer',
   webDir: 'dist/client',
   server: {
-    androidScheme: 'https'
-  }
-};
+    url: 'https://planer.ermuhanovdias.workers.dev/',
+    androidScheme: 'https',
+    iosScheme: 'https'
+  },
+  plugins: {
+      EdgeToEdge: {
+      backgroundColor: '#000000'
+      },
+    },
+  };
 
-export default config;
-
+  export default config;
