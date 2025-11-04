@@ -20,7 +20,6 @@ import {
   Avatar,
   AvatarGroup,
   Container,
-  Grid,
   Fab,
   BottomNavigation,
   BottomNavigationAction,
@@ -213,8 +212,12 @@ function App() {
           <Typography variant="h5" gutterBottom>
             Card (Карточки)
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 2 
+          }}>
+            <Box>
               <Card>
                 <CardMedia
                   sx={{ height: 140, bgcolor: 'primary.main' }}
@@ -241,8 +244,8 @@ function App() {
                   </IconButton>
                 </CardActions>
               </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            </Box>
+            <Box>
               <Card>
                 <CardMedia
                   sx={{ height: 140, bgcolor: 'secondary.main' }}
@@ -269,8 +272,8 @@ function App() {
                   </IconButton>
                 </CardActions>
               </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            </Box>
+            <Box>
               <Card>
                 <CardMedia
                   sx={{ height: 140, bgcolor: 'success.main' }}
@@ -294,8 +297,8 @@ function App() {
                   </Button>
                 </CardActions>
               </Card>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
 
         {/* Component Info */}
@@ -303,8 +306,12 @@ function App() {
           <Typography variant="h5" gutterBottom>
             Дополнительные компоненты
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+            gap: 2 
+          }}>
+            <Box>
               <Card variant="outlined">
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -317,8 +324,8 @@ function App() {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            </Box>
+            <Box>
               <Card variant="outlined">
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -332,8 +339,8 @@ function App() {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
       </Container>
 
@@ -370,7 +377,7 @@ function App() {
           <BottomNavigation
             showLabels
             value={navValue}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               setNavValue(newValue)
             }}
             sx={{
