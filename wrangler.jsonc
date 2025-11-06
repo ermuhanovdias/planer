@@ -12,6 +12,11 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+	"vars": {
+		"MY_NAME": "Dias"
+		
+
 	}
 	/**
 	 * Smart Placement
