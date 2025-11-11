@@ -1,52 +1,43 @@
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
+import { Hono } from 'hono';
+import versionRouter from './routes/version';
 
-    // API для получения текущей версии приложения
-    if (url.pathname === "/api/version") {
-      try {
-        const result = await env.DB.prepare(
-          "SELECT version, release_date, description FROM app_version WHERE is_current = 1"
-        ).first();
-        
-        return Response.json({
-          success: true,
-          data: result
-        });
-      } catch (error) {
-        return Response.json({
-          success: false,
-          error: error.message
-        }, { status: 500 });
-      }
-    }
+type Bindings = {
+  DB: D1Database;
+};
 
-    // API для получения всех версий
-    if (url.pathname === "/api/versions") {
-      try {
-        const { results } = await env.DB.prepare(
-          "SELECT * FROM app_version ORDER BY created_at DESC"
-        ).all();
-        
-        return Response.json({
-          success: true,
-          data: results
-        });
-      } catch (error) {
-        return Response.json({
-          success: false,
-          error: error.message
-        }, { status: 500 });
-      }
-    }
+const app = new Hono<{ Bindings: Bindings }>();
 
-    if (url.pathname.startsWith("/api/")) {
-      return Response.json({
-        name: "Cloudflare",
-        message: "API endpoint не найден"
-      }, { status: 404 });
-    }
+// Mount version routes
+app.route('/api/version', versionRouter);
 
-    return new Response(null, { status: 404 });
-  },
-} satisfies ExportedHandler<Env>;
+// For backward compatibility
+app.get('/api/versions', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT * FROM app_version ORDER BY created_at DESC"
+    ).all();
+    
+    return c.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    return c.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// 404 handler for non-existent API endpoints
+app.notFound((c) => {
+  if (c.req.path.startsWith('/api/')) {
+    return c.json({
+      name: "Cloudflare",
+      message: "API endpoint not found"
+    }, 404);
+  }
+  return c.text('Not Found', 404);
+});
+
+export default app;

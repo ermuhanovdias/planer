@@ -1,0 +1,56 @@
+# Project Rules - Planer
+
+## Tech Stack
+- Frontend: Vite + React + MUI (Material-UI)
+- Backend: Cloudflare Workers + Hono
+- Database: Cloudflare D1
+- Authentication: Firebase Auth with JWT
+- Additional: Cloudflare services ecosystem
+
+## Project Structure
+- Follow standard Vite + React project structure
+- Keep components modular and reusable
+- Separate business logic from UI components
+- Use MUI components as primary UI library
+
+## Code Style
+- Use TypeScript for type safety
+- Prefer functional components with hooks
+- Use arrow functions for component definitions
+- Keep files focused and single-purpose
+- All code comments must be in English only
+- All log messages (console.log, errors, debug) must be in English only
+
+## Backend Guidelines
+- Use Hono framework for Cloudflare Workers
+- Implement proper JWT validation for protected routes
+- Use D1 for database operations with proper error handling
+- Follow Cloudflare Workers best practices and limitations
+- Keep Workers lightweight and efficient
+
+## Authentication
+- Use Firebase Auth for user management
+- Validate JWT tokens on Cloudflare Workers
+- Implement proper auth middleware with Hono
+- Handle token refresh and expiration gracefully
+
+## Development Practices
+- Always preserve existing functionality when adding features
+- Choose the simplest implementation possible
+- Continuously simplify and optimize code
+- Test changes in context of the full application
+- Avoid creating documentation files (README, guides) unless explicitly requested
+- Ask user before introducing new technologies or languages not in the tech stack
+
+## Database
+- Use Cloudflare D1 for relational data
+- Write efficient SQL queries
+- Handle migrations properly
+- Consider D1 limitations (request timeouts, concurrent operations)
+
+## UI/UX
+- Use MUI components consistently
+- Follow Material Design principles
+- Ensure responsive design for all screen sizes
+- Maintain consistent styling across the application
+
