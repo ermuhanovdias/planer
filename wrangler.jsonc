@@ -17,7 +17,15 @@
 		"MY_NAME": "Dias"
 		
 
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "planer-db",
+			"database_id": "74653467-2459-4213-b73d-ceee252f1d0e",
+			"migrations_dir": "migrations"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
