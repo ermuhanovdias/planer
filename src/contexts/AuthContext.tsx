@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendEmailVerification,
 } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth } from '../config/firebase';
@@ -47,9 +48,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await updateProfile(userCredential.user, { displayName });
       }
 
-      // Get and store token
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem('authToken', token);
+      // Send email verification
+      await sendEmailVerification(userCredential.user);
+
+      // Do NOT store token yet - user needs to verify email first
+      // The user will be signed out and redirected to verify email page
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
@@ -60,6 +63,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function login(email: string, password: string) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        // Sign out the user if email is not verified
+        await signOut(auth);
+        throw new Error('EMAIL_NOT_VERIFIED');
+      }
       
       // Get and store token
       const token = await userCredential.user.getIdToken();
@@ -101,9 +111,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
+      // Only set user if email is verified
+      if (user && user.emailVerified) {
+        setCurrentUser(user);
+        
         // Update token in localStorage when user state changes
         try {
           const token = await user.getIdToken();
@@ -112,6 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.error('Token refresh error:', error);
         }
       } else {
+        setCurrentUser(null);
         localStorage.removeItem('authToken');
       }
       

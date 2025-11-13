@@ -47,7 +47,9 @@ export default function Register() {
       setError('');
       setLoading(true);
       await signup(email, password, displayName || undefined);
-      navigate('/');
+      
+      // Redirect to verify email page
+      navigate('/verify-email');
     } catch (error: any) {
       console.error('Registration failed:', error);
       

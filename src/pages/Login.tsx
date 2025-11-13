@@ -40,6 +40,12 @@ export default function Login() {
     } catch (error: any) {
       console.error('Login failed:', error);
       
+      // Handle email not verified error
+      if (error.message === 'EMAIL_NOT_VERIFIED') {
+        setError('Please verify your email before logging in. Check your inbox for the verification link.');
+        return;
+      }
+      
       // Handle specific Firebase auth errors
       const errorCode = error?.code;
       switch (errorCode) {
