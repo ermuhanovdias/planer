@@ -1,9 +1,9 @@
-import { Context, Next } from 'hono';
+import type { Context, Next } from 'hono';
 import { 
   verifyFirebaseAuth, 
-  getFirebaseToken, 
-  VerifyFirebaseAuthEnv 
+  getFirebaseToken,
 } from '@hono/firebase-auth';
+import type { VerifyFirebaseAuthEnv } from '@hono/firebase-auth';
 
 // Create auth middleware instance
 export function createAuthMiddleware() {

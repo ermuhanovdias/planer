@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import versionRouter from './routes/version';
-import { createAuthMiddleware, getAuthUser, VerifyFirebaseAuthEnv } from './middleware/auth';
+import { createAuthMiddleware, getAuthUser } from './middleware/auth';
+import type { VerifyFirebaseAuthEnv } from './middleware/auth';
 
 type Bindings = {
   DB: D1Database;

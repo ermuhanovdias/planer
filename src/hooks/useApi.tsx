@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 
-interface UseApiOptions<T> {
+interface UseApiOptions {
   endpoint: string;
   autoFetch?: boolean;
 }
@@ -19,7 +19,7 @@ interface UseApiResult<T> {
 export function useApi<T = any>({ 
   endpoint, 
   autoFetch = true 
-}: UseApiOptions<T>): UseApiResult<T> {
+}: UseApiOptions): UseApiResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(autoFetch);
   const [error, setError] = useState<string | null>(null);
