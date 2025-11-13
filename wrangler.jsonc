@@ -23,7 +23,8 @@
 			"binding": "DB",
 			"database_name": "planer-db",
 			"database_id": "74653467-2459-4213-b73d-ceee252f1d0e",
-			"migrations_dir": "migrations"
+			"migrations_dir": "migrations",
+			"remote": true
 		}
 	]
 	/**
