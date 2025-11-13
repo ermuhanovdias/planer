@@ -48,8 +48,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await updateProfile(userCredential.user, { displayName });
       }
 
-      // Send email verification
-      await sendEmailVerification(userCredential.user);
+      // Send email verification with action code settings
+      const actionCodeSettings = {
+        // URL to redirect after email verification
+        url: window.location.origin + '/verify-email?verified=true',
+        handleCodeInApp: false,
+      };
+
+      await sendEmailVerification(userCredential.user, actionCodeSettings);
 
       // Do NOT store token yet - user needs to verify email first
       // The user will be signed out and redirected to verify email page

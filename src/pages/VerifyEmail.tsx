@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
   Box,
@@ -19,21 +19,33 @@ export default function VerifyEmail() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const user = auth.currentUser;
 
   useEffect(() => {
-    // If no user or email already verified, redirect to login
-    if (!user) {
+    // Check if user came back after email verification
+    const verified = searchParams.get('verified');
+    
+    // If no user, redirect to login
+    if (!user && verified !== 'true') {
       navigate('/login');
       return;
     }
     
-    if (user.emailVerified) {
+    // If user came back after clicking verification link
+    if (verified === 'true' && user) {
+      // Auto-check verification status
+      handleCheckVerification();
+    }
+    
+    // If email already verified, redirect to home
+    if (user && user.emailVerified) {
       navigate('/');
       return;
     }
-  }, [user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, navigate, searchParams]);
 
   const handleResendEmail = async () => {
     if (!user) return;
@@ -43,7 +55,13 @@ export default function VerifyEmail() {
       setError('');
       setMessage('');
       
-      await sendEmailVerification(user);
+      // Send email with action code settings to redirect back to our app
+      const actionCodeSettings = {
+        url: window.location.origin + '/verify-email?verified=true',
+        handleCodeInApp: false,
+      };
+      
+      await sendEmailVerification(user, actionCodeSettings);
       setMessage('Verification email sent! Please check your inbox.');
     } catch (error: any) {
       console.error('Failed to send verification email:', error);
@@ -125,7 +143,7 @@ export default function VerifyEmail() {
 
             <Alert severity="info" sx={{ mb: 3 }}>
               Пожалуйста, проверьте свою почту и перейдите по ссылке для подтверждения. 
-              После этого нажмите кнопку "Проверить" ниже.
+              После клика по ссылке вы автоматически вернетесь в приложение.
             </Alert>
 
             {message && (
