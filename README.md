@@ -1,126 +1,162 @@
 # Planer
 
-Приложение на базе React + TypeScript + Vite с поддержкой Cloudflare Workers и Capacitor для Android.
+Мобильное приложение-планер, построенное на современном технологическом стеке.
 
-## 🚀 Технологии
+## Технологии
 
-- **Frontend**: React 19, TypeScript, Vite
+- **Frontend**: React 19 + TypeScript + Vite
 - **Backend**: Cloudflare Workers
 - **Mobile**: Capacitor (Android)
-- **Сборка**: Vite 7
-- **Линтинг**: ESLint 9
+- **Build Tools**: Vite 7, Wrangler 4
 
-## 📋 Предварительные требования
-
-- Node.js (рекомендуется последняя LTS версия)
-- npm или yarn
-- Для Android разработки: Android Studio и Java Development Kit (JDK)
-
-## 🛠️ Установка
-
-```bash
-# Установка зависимостей
-npm install
-```
-
-## 💻 Разработка
-
-### Веб-разработка
-
-```bash
-# Запуск dev сервера
-npm run dev
-
-# Сборка проекта
-npm run build
-
-# Предварительный просмотр production сборки
-npm run preview
-
-# Проверка кода
-npm run lint
-```
-
-### Cloudflare Workers
-
-```bash
-# Деплой на Cloudflare Workers
-npm run deploy
-
-# Генерация типов для Cloudflare
-npm run cf-typegen
-```
-
-### Android разработка
-
-```bash
-# Синхронизация с Capacitor (после сборки)
-npm run cap:sync
-
-# Открыть проект в Android Studio
-npm run cap:open:android
-
-# Запустить на Android устройстве/эмуляторе
-npm run cap:run:android
-
-# Собрать Android приложение
-npm run cap:build:android
-```
-
-## 📁 Структура проекта
+## Структура проекта
 
 ```
 planer/
-├── src/                    # Исходный код React приложения
-│   ├── App.tsx            # Главный компонент
-│   ├── main.tsx           # Точка входа
-│   └── assets/            # Статические ресурсы
-├── worker/                # Cloudflare Worker код
-│   └── index.ts           # API endpoints
-├── android/               # Capacitor Android проект
-├── public/                # Публичные статические файлы
-├── dist/                  # Собранные файлы
-├── capacitor.config.ts    # Конфигурация Capacitor
-├── wrangler.jsonc         # Конфигурация Cloudflare Workers
-└── vite.config.ts         # Конфигурация Vite
-
+├── src/                    # React frontend source code
+│   ├── App.tsx            # Main application component
+│   ├── main.tsx           # Application entry point
+│   └── assets/            # Static assets (images, styles)
+├── worker/                # Cloudflare Worker backend
+│   └── index.ts           # Worker API handler
+├── android/               # Native Android application
+├── dist/                  # Build output
+│   ├── client/            # Frontend build
+│   └── planer/            # Worker build
+├── capacitor.config.ts    # Capacitor configuration
+├── wrangler.jsonc         # Cloudflare Workers configuration
+└── vite.config.ts         # Vite configuration
 ```
 
-## 🌐 API
+## Требования
 
-Приложение включает базовый API endpoint в `worker/index.ts`, который можно расширять для добавления серверной логики.
+- Node.js 18+
+- npm или yarn
+- (Опционально) Android Studio для разработки мобильного приложения
 
-## 📱 Мобильное приложение
+## Установка
 
-Проект настроен для сборки Android приложения через Capacitor:
-- **App ID**: `com.planer.app`
-- **App Name**: planer
-- **Web Directory**: `dist/client`
+```bash
+npm install
+```
 
-## 🔧 Конфигурация
+## Разработка
 
-- **Vite**: `vite.config.ts`
-- **TypeScript**: `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`
-- **ESLint**: `eslint.config.js`
-- **Capacitor**: `capacitor.config.ts`
-- **Cloudflare Workers**: `wrangler.jsonc`
+### Локальный запуск (с HMR)
 
-## 📝 Разработка
+```bash
+npm run dev
+```
 
-1. Внесите изменения в `src/` для frontend кода
-2. Отредактируйте `worker/index.ts` для API/backend логики
-3. Запустите `npm run dev` для горячей перезагрузки
-4. Используйте `npm run cap:sync` для синхронизации изменений с мобильным приложением
+Приложение будет доступно по адресу `http://localhost:5173`
 
-## 🚢 Деплой
+### Превью продакшен-билда
+
+```bash
+npm run preview
+```
+
+## Сборка
+
+```bash
+npm run build
+```
+
+Собранные файлы появятся в директории `dist/`:
+- `dist/client/` - фронтенд приложение
+- `dist/planer/` - Cloudflare Worker
+
+## Деплой
 
 ### Cloudflare Workers
+
 ```bash
 npm run deploy
 ```
 
-### Android
-Соберите APK через Android Studio после выполнения:
+Эта команда:
+1. Соберет проект
+2. Задеплоит Worker и статические ассеты на Cloudflare
+
+### Генерация типов для Cloudflare
+
 ```bash
-npm run cap:build:android
+npm run cf-typegen
 ```
+
+## Мобильное приложение (Android)
+
+### Синхронизация с Capacitor
+
+```bash
+npm run cap:sync
+```
+
+### Сборка и открытие в Android Studio
+
+```bash
+npm run android
+```
+
+Эта команда:
+1. Соберет веб-приложение
+2. Синхронизирует с Capacitor
+3. Откроет проект в Android Studio
+
+### Другие команды для Android
+
+```bash
+# Только открыть в Android Studio
+npm run cap:open:android
+
+# Собрать и синхронизировать без открытия
+npm run cap:build:android
+
+# Запустить на устройстве/эмуляторе
+npm run cap:run:android
+```
+
+## API
+
+Backend реализован как Cloudflare Worker и предоставляет REST API:
+
+- `GET /api/` - пример endpoint, возвращает `{ name: "Cloudflare" }`
+
+Редактируйте `worker/index.ts` для добавления новых endpoint'ов.
+
+## Линтинг
+
+```bash
+npm run lint
+```
+
+## Конфигурация
+
+- **Vite**: `vite.config.ts` - конфигурация сборщика и dev-сервера
+- **Cloudflare**: `wrangler.jsonc` - конфигурация Worker'а
+- **Capacitor**: `capacitor.config.ts` - настройки нативного приложения
+- **ESLint**: `eslint.config.js` - правила линтера
+
+### Переменные окружения
+
+Создайте файл `.env` в корне проекта для настройки:
+
+```bash
+# API Configuration
+# Оставьте пустым для веб-сборки (будет использоваться относительный путь /api)
+# Укажите полный домен для кастомных развертываний
+VITE_API_BASE_URL=
+```
+
+**Автоматическая настройка API для мобильного приложения:**
+
+- Для **веб-версии**: используется относительный путь `/api` (работает с Cloudflare Workers)
+- Для **мобильного приложения** (Android/iOS): автоматически используется `https://planer.quicpro.workers.dev/api`
+- Можно переопределить через переменную окружения `VITE_API_BASE_URL`
+
+Логика определения API endpoint находится в `src/services/apiClient.ts` и использует Capacitor API для определения платформы.
+
+## Лицензия
+
+Private
+

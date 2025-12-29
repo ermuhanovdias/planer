@@ -6,7 +6,8 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "planer",
 	"main": "worker/index.ts",
-	"compatibility_date": "2025-10-24",
+	"compatibility_date": "2025-11-25",
+	"account_id": "2d1a483aecfd8366465767348fc374a3",
 	"assets": {
 		"not_found_handling": "single-page-application"
 	},
@@ -14,47 +15,58 @@
 		"enabled": true
 	},
 	"vars": {
-		"MY_NAME": "Dias"
-		
-
+		"MY_NAME": "Egor",
+		"PUBLIC_JWK_CACHE_KEY": "firebase-auth-jwk-cache"
 	},
+	/**
+	 * D1 Database
+	 * https://developers.cloudflare.com/d1/
+	 */
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "planer-db",
-			"database_id": "74653467-2459-4213-b73d-ceee252f1d0e",
-			"migrations_dir": "migrations",
+			"database_id": "b76a6cd6-0697-4e0f-a65a-62f0d1eea0db",
 			"remote": true
 		}
-	]
+	],
 	/**
-	 * Smart Placement
-	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+	 * KV Namespaces for Firebase Auth public key caching
+	 * https://developers.cloudflare.com/kv/
 	 */
-	// "placement": { "mode": "smart" }
+	"kv_namespaces": [
+		{
+			"binding": "PUBLIC_JWK_CACHE_KV",
+			"id": "add86b2f4dca4439b0afe753fa1d3553",
+			"remote": true
+		}
+	],
 	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+	 * Environments
+	 * https://developers.cloudflare.com/workers/wrangler/environments/
 	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 */
-	// "vars": { "MY_VARIABLE": "production_value" }
-	/**
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": { "directory": "./public/", "binding": "ASSETS" }
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+	"env": {
+		"dev": {
+			"name": "planer-dev",
+			"vars": {
+				"MY_NAME": "Egor-dev",
+				"PUBLIC_JWK_CACHE_KEY": "firebase-auth-jwk-cache"
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "planer-db-dev",
+					"database_id": "6d406871-bd54-4112-b107-a873c58e5213",
+					"remote": true
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "PUBLIC_JWK_CACHE_KV",
+					"id": "a9ac360e4f9546be94d8a1bbb7b0e819",
+					"remote": true
+				}
+			]
+		}
+	}
 }

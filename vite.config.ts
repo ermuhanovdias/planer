@@ -5,17 +5,15 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), 
+  plugins: [react(),
     cloudflare({
-      experimental: {
-        remoteBindings: true,
-      } as any,
-    })
-  ],
-  build: {
-    outDir: 'dist',
-  },
+      remoteBindings: true,
+    }),
+    ],
+  // Capacitor uses file:// protocol, so we need to use relative paths
+  base: './',
   server: {
-    port: 5173,
+    // Allow access from mobile devices on local network
+    host: true,
   },
 })

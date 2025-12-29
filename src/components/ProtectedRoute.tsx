@@ -1,13 +1,14 @@
-import { Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { Box, CircularProgress } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { AuthPage } from './Auth/AuthPage';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { currentUser, loading } = useAuth();
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,10 +25,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <AuthPage />;
   }
 
   return <>{children}</>;
-}
+};
 

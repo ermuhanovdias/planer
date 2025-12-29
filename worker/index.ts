@@ -1,117 +1,159 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import versionRouter from './routes/version';
-import { createAuthMiddleware, getAuthUser } from './middleware/auth';
-import type { VerifyFirebaseAuthEnv } from './middleware/auth';
+import { verifyFirebaseAuth, getFirebaseToken } from '@hono/firebase-auth';
+import type { VerifyFirebaseAuthConfig, VerifyFirebaseAuthEnv } from '@hono/firebase-auth';
+import type { AppVersion, ApiResponse } from './db-types';
+import userRoutes from './routes/users';
+import taskRoutes from './routes/tasks';
+import tagRoutes from './routes/tags';
+import recurrenceRoutes from './routes/recurrence';
 
-type Bindings = {
-  DB: D1Database;
-} & VerifyFirebaseAuthEnv;
+const config: VerifyFirebaseAuthConfig = {
+  projectId: 'planer-4ea92',
+};
+
+type Bindings = Env & VerifyFirebaseAuthEnv;
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// CORS middleware - allow frontend to make requests
-app.use('/api/*', cors({
-  origin: '*', // In production, replace with your actual frontend domain
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+// CORS middleware - must be before all other middleware
+app.use('/*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  exposeHeaders: ['Content-Length'],
+  maxAge: 86400,
+  credentials: false,
 }));
 
-// Public routes (no auth required)
-app.get('/api/health', (c) => {
+// Health check endpoint (public, no auth required)
+app.get('/api/health', async (c) => {
   return c.json({
-    success: true,
-    message: 'API is healthy',
-    timestamp: new Date().toISOString()
+    status: 'ok',
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Apply Firebase Auth middleware to all /api/* routes except public ones
-const authMiddleware = createAuthMiddleware();
+// Apply Firebase Auth middleware to all /api/* routes except health check
+app.use('/api/*', verifyFirebaseAuth(config));
 
-// Protected routes - require authentication
-app.use('/api/version/*', authMiddleware);
-app.use('/api/versions', authMiddleware);
-
-// Mount version routes (protected)
-app.route('/api/version', versionRouter);
-
-// For backward compatibility (protected)
-app.get('/api/versions', async (c) => {
-  try {
-    const user = getAuthUser(c);
-    
-    // Optional: Log which user is accessing the API
-    console.log('User accessing versions:', {
-      uid: user?.uid,
-      email: user?.email,
-    });
-    
-    const { results } = await c.env.DB.prepare(
-      "SELECT * FROM app_version ORDER BY created_at DESC"
-    ).all();
-    
-    return c.json({
-      success: true,
-      data: results
-    });
-  } catch (error) {
+// Middleware to check email verification for all protected routes
+app.use('/api/*', async (c, next) => {
+  // Skip verification check for certain endpoints
+  const path = new URL(c.req.url).pathname;
+  if (path === '/api/health' || path === '/api/auth/me' || path.startsWith('/api/users/sync')) {
+    return next();
+  }
+  
+  const idToken = getFirebaseToken(c);
+  if (idToken && !idToken.email_verified) {
     return c.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
+      error: 'Email not verified. Please verify your email to access this resource.',
+      requiresEmailVerification: true,
+    }, 403);
   }
+  
+  return next();
 });
 
-// Get current authenticated user info
-app.get('/api/auth/me', authMiddleware, (c) => {
-  const user = getAuthUser(c);
+// Mount routes
+app.route('/api/users', userRoutes);
+app.route('/api/tasks', taskRoutes);
+app.route('/api/tags', tagRoutes);
+app.route('/api/recurrence', recurrenceRoutes);
+
+// Get current user info (protected)
+app.get('/api/auth/me', async (c) => {
+  const idToken = getFirebaseToken(c);
   
-  if (!user) {
+  if (!idToken) {
     return c.json({
       success: false,
-      error: 'Not authenticated'
+      error: 'Unauthorized',
     }, 401);
+  }
+  
+  // Check if email is verified
+  if (!idToken.email_verified) {
+    return c.json({
+      success: false,
+      error: 'Email not verified. Please verify your email to access this resource.',
+      requiresEmailVerification: true,
+    }, 403);
   }
   
   return c.json({
     success: true,
     data: {
-      uid: user.uid,
-      email: user.email,
-      name: user.name,
-      email_verified: user.email_verified,
-    }
+      uid: idToken.uid,
+      email: idToken.email,
+      email_verified: idToken.email_verified,
+    },
   });
 });
 
-// 404 handler for non-existent API endpoints
-app.notFound((c) => {
-  if (c.req.path.startsWith('/api/')) {
-    return c.json({
-      name: "Cloudflare",
-      message: "API endpoint not found"
-    }, 404);
+// Get current app version (protected)
+app.get('/api/version', async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT * FROM app_version WHERE is_current = 1 ORDER BY created_at DESC LIMIT 1"
+    ).first<AppVersion>();
+    
+    const response: ApiResponse<AppVersion | null> = {
+      success: true,
+      data: result || null,
+    };
+    return c.json(response);
+  } catch (error) {
+    const response: ApiResponse<never> = {
+      success: false,
+      error: error instanceof Error ? error.message : "Database error",
+    };
+    return c.json(response, 500);
   }
-  return c.text('Not Found', 404);
 });
 
-// Error handler
-app.onError((err, c) => {
-  console.error('Server error:', err);
-  
-  // Handle Firebase Auth errors
-  if (err.message.includes('Firebase') || err.message.includes('JWT')) {
-    return c.json({
+// Get all versions (protected)
+app.get('/api/versions', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT * FROM app_version ORDER BY created_at DESC"
+    ).all<AppVersion>();
+    
+    const response: ApiResponse<AppVersion[]> = {
+      success: true,
+      data: results,
+    };
+    return c.json(response);
+  } catch (error) {
+    const response: ApiResponse<never> = {
       success: false,
-      error: 'Authentication failed: Invalid or expired token'
+      error: error instanceof Error ? error.message : "Database error",
+    };
+    return c.json(response, 500);
+  }
+});
+
+// 404 handler
+app.notFound((c) => {
+  return c.json({ error: 'Not Found' }, 404);
+});
+
+// Error handler for authentication errors
+app.onError((err, c) => {
+  console.error('Error:', err);
+  
+  if (err.message.includes('Unauthorized') || err.message.includes('authentication')) {
+    return c.json({ 
+      success: false, 
+      error: 'Unauthorized. Please login.' 
     }, 401);
   }
   
-  return c.json({
-    success: false,
-    error: 'Internal server error'
+  return c.json({ 
+    success: false, 
+    error: 'Internal server error' 
   }, 500);
 });
 
